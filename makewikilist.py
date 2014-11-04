@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import re
-from localisation import loc
 
 inland_seas = [
 # Baltic
@@ -71,6 +70,23 @@ def decode(raw):
     d = [el for el in d if el != '']
     return recdict(d + ['}'], 0)
 
+f = open('localisation.txt')
+loc_dat = f.read().split('\n')
+f.close()
+
+out = ['# coding: utf-8\nloc = {\nNone: "",\n']
+for line in [line for line in loc_dat if re.search('\".*\"', line) != None]:
+    tmp = re.sub("^\ ", "'", line)
+    tmp = re.sub(":", "':", tmp)
+    out.append(re.sub("\"[\ \r]*$", '",\n', tmp))
+out.append('}\n')
+
+f = open('localisation.py', 'w')
+f.write("".join(out))
+f.close()
+
+from localisation import loc
+
 provtab = {}
 
 f = open('prov_names.txt')
@@ -114,15 +130,16 @@ for r in reg:
     for p in reg[r]:
         provtab[int(p)][3].append(r)
 
-f = open('provinces.txt', encoding="latin-1")
-pro = f.read()
-f.close()
-
 dk = re.compile('1[0-9]{3}\.[0-9]{1,2}\.[0-9]{1,2}')
 
-for p in pro.split('@@')[1:]:
-    num, dat = p.split('@')
-    num = int(num)
+for num in provtab:
+    try:
+        f = open(str(num), encoding="latin-1")
+        dat = f.read()
+        f.close()
+    except FileNotFoundError:
+        continue
+    dat = dat + '\n'
     dat = re.sub("\#.*\n","\n",dat)
     dat = re.sub('\".*\ .*\"', 'missing_string', dat)
     if len(re.findall('add_permanent_province_modifier', dat)) > 2:
