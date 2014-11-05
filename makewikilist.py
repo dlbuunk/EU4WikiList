@@ -45,12 +45,29 @@ def recdict(ld, i):
     elif ld[i+1] == '=':
         dd = {}
         while ld[i] != '}':
-            if ld[i+2] != '{':
-                dd[ld[i]] = ld[i+2]
-                i = i + 3
+            if ld[i] in dd and type(dd[ld[i]]) is tuple:
+                if ld[i+2] != '{':
+                    dd[ld[i]] = dd[ld[i]] + (ld[i+2],)
+                    i = i + 3
+                else:
+                    tmp, it = recdict(ld, i+3)
+                    dd[ld[i]] = dd[ld[i]] + (tmp,)
+                    i = it
+            elif ld[i] in dd:
+                if ld[i+2] != '{':
+                    dd[ld[i]] = (dd[ld[i]], ld[i+2])
+                    i = i + 3
+                else:
+                    tmp, it = recdict(ld, i+3)
+                    dd[ld[i]] = (dd[ld[i]], tmp)
+                    i = it
             else:
-                dd[ld[i]], it = recdict(ld, i+3)
-                i = it
+                if ld[i+2] != '{':
+                    dd[ld[i]] = ld[i+2]
+                    i = i + 3
+                else:
+                    dd[ld[i]], it = recdict(ld, i+3)
+                    i = it
         return (dd,i+1)
     else:
         ll = []
@@ -124,6 +141,9 @@ f = open('region.txt', encoding="latin-1")
 reg = decode(f.read())[0]
 f.close()
 
+# hardcoded bugfix
+reg['funj_spawning_region'] = reg['funj_spawning_region'][0]
+
 for p in provtab:
     provtab[p] = provtab[p] + [[], []]
 for r in reg:
@@ -142,10 +162,6 @@ for num in provtab:
     dat = dat + '\n'
     dat = re.sub("\#.*\n","\n",dat)
     dat = re.sub('\".*\ .*\"', 'missing_string', dat)
-    if len(re.findall('add_permanent_province_modifier', dat)) > 2:
-        print("3 specials...")
-    elif len(re.findall('add_permanent_province_modifier', dat)) == 2:
-        dat = dat.replace('add_permanent_province_modifier', 'add_permanent_province_modifier_1', 1)
     dat = decode(dat)[0]
     if dat == None:
         provtab[num] = provtab[num] + [None, None, None, None, None, None]
@@ -172,33 +188,52 @@ for num in provtab:
             provtab[num][4].append(upd[key]['add_permanent_province_modifier']['name'])
         except KeyError:
             pass
-        try:
-            provtab[num][4].append(upd[key]['add_permanent_province_modifier_1']['name'])
-        except KeyError:
-            pass
+        except TypeError:
+            try:
+                for modifier in upd[key]['add_permanent_province_modifier']:
+                    provtab[num][4].append(modifier['name'])
+            except TypeError:
+                for modifier in upd[key]:
+                    provtab[num][4].append(modifier['add_permanent_province_modifier']['name'])
+#        try:
+#            provtab[num][4].append(upd[key]['add_permanent_province_modifier_1']['name'])
+#        except KeyError:
+#            pass
         try:
             dat['owner'] = upd[key]['owner']
         except KeyError:
+            pass
+        except TypeError:
             pass
         try:
             dat['base_tax'] = upd[key]['base_tax']
         except KeyError:
             pass
+        except TypeError:
+            pass
         try:
             dat['manpower'] = upd[key]['manpower']
         except KeyError:
+            pass
+        except TypeError:
             pass
         try:
             dat['religion'] = upd[key]['religion']
         except KeyError:
             pass
+        except TypeError:
+            pass
         try:
             dat['culture'] = upd[key]['culture']
         except KeyError:
             pass
+        except TypeError:
+            pass
         try:
             dat['trade_goods'] = upd[key]['trade_goods']
         except KeyError:
+            pass
+        except TypeError:
             pass
 
     try:
