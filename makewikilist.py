@@ -148,9 +148,6 @@ f = open('region.txt', encoding="latin-1")
 reg = decode(f.read())[0]
 f.close()
 
-# hardcoded bugfix
-#reg['funj_spawning_region'] = reg['funj_spawning_region'][0]
-
 for p in provtab:
     provtab[p] = provtab[p] + [[], []]
 for r in reg:
@@ -184,7 +181,7 @@ for num in provtab:
             if int(year) == 1444 and int(month) > 11:
                 continue
             if int(year) == 1444 and int(month) == 11 and int(day) > 11:
-               continue
+                continue
             if len(month) == 1:
                 month = '0' + month
             if len(day) == 1:
@@ -209,10 +206,6 @@ for num in provtab:
                     except TypeError:
                         for submod in modifier:
                             provtab[num][4].append(submod['name'])
-#        try:
-#            provtab[num][4].append(upd[key]['add_permanent_province_modifier_1']['name'])
-#        except KeyError:
-#            pass
         try:
             dat['owner'] = upd[key]['owner']
         except KeyError:
@@ -274,10 +267,6 @@ for num in provtab:
         provtab[num].append(dat['trade_goods'])
     except KeyError:
         provtab[num].append(None)
-
-#for i in provtab:
-#    if len(provtab[i]) < 11:
-#        provtab[i] = provtab[i] + [None, None, None, None, None, None]
 
 for p in provtab:
     if provtab[p][5] == 'XXX':
