@@ -37,6 +37,12 @@ relcol = {
 'confucianism': "CC00E6",
 'sunni': "009900",
 'animism': "800000",
+'protestant': "FFFFFF",
+'reformed': "FFFFFF",
+'sikhism': "FFFFFF",
+'nahuatl': "3F723F",
+'inti': "3F7272",
+'mesoamerican_religion': "72723F"
 }
 
 def recdict(ld, i):
@@ -95,6 +101,7 @@ out = ['# coding: utf-8\nloc = {\nNone: "",\n']
 for line in [line for line in loc_dat if re.search('\".*\"', line) != None]:
     tmp = re.sub("^\ ", "'", line)
     tmp = re.sub(":", "':", tmp)
+    tmp = re.sub(" # .*", '', tmp)
     out.append(re.sub("\"[\ \r]*$", '",\n', tmp))
 out.append('}\n')
 
@@ -142,7 +149,7 @@ reg = decode(f.read())[0]
 f.close()
 
 # hardcoded bugfix
-reg['funj_spawning_region'] = reg['funj_spawning_region'][0]
+#reg['funj_spawning_region'] = reg['funj_spawning_region'][0]
 
 for p in provtab:
     provtab[p] = provtab[p] + [[], []]
@@ -158,6 +165,7 @@ for num in provtab:
         dat = f.read()
         f.close()
     except FileNotFoundError:
+        provtab[num] = provtab[num] + [None, None, None, None, None, None]
         continue
     dat = dat + '\n'
     dat = re.sub("\#.*\n","\n",dat)
@@ -176,7 +184,7 @@ for num in provtab:
             if int(year) == 1444 and int(month) > 11:
                 continue
             if int(year) == 1444 and int(month) == 11 and int(day) > 11:
-                continue
+               continue
             if len(month) == 1:
                 month = '0' + month
             if len(day) == 1:
@@ -194,7 +202,13 @@ for num in provtab:
                     provtab[num][4].append(modifier['name'])
             except TypeError:
                 for modifier in upd[key]:
-                    provtab[num][4].append(modifier['add_permanent_province_modifier']['name'])
+                    try:
+                        provtab[num][4].append(modifier['add_permanent_province_modifier']['name'])
+                    except KeyError:
+                        pass
+                    except TypeError:
+                        for submod in modifier:
+                            provtab[num][4].append(submod['name'])
 #        try:
 #            provtab[num][4].append(upd[key]['add_permanent_province_modifier_1']['name'])
 #        except KeyError:
@@ -261,9 +275,13 @@ for num in provtab:
     except KeyError:
         provtab[num].append(None)
 
-for i in provtab:
-    if len(provtab[i]) < 11:
-        provtab[i] = provtab[i] + [None, None, None, None, None, None]
+#for i in provtab:
+#    if len(provtab[i]) < 11:
+#        provtab[i] = provtab[i] + [None, None, None, None, None, None]
+
+for p in provtab:
+    if provtab[p][5] == 'XXX':
+        provtab[p][5] = None
 
 for p in provtab:
     if provtab[p][8] != None:
@@ -377,7 +395,7 @@ regions = [
 ('Far East',['korean_region','japanese_region']),
 ('indonesian_region',['javan_region','sumatran_region','borneo_region','malay_peninsula_region','spice_islands']),
 ('',['indochinan_region','eastasian_trade_ports','east_asian_cot']),
-('persian_region',['baluchistan_region','khorasan_region','afghanistan_region','tabarestan_region','sistan_region']),
+('persian_region',['baluchistan_region','khorasan_region','afghanistan_region','tabarestan_region','sistan_region','transoxiana_region']),
 ('arab_region',['hedjazi_region','yemeni_region','omani_region','nejdi_region']),
 ('middle_east',['armenian_region','azerbaijani_region','mesopotamian_region','syrian_region']),
 ]),
@@ -398,7 +416,7 @@ regions = [
 ("north_america",[
 ('northern_america',['northwestern_america','northeastern_america','greenland_region']),
 ('',['columbia_region','hudson_bay_region','st_lawrence_region','canada_region','newfoundland_region','acadia_region']),
-('',['western_america','great_plains','the_mississippi_region','eastern_america','the_thirteen_colonies']),
+('',['western_america','great_plains','the_mississippi_region','eastern_america','the_thirteen_colonies','new_england_region']),
 ('central_america',['mesoamerica_region','yucatan_region','the_carribean']),
 ]),
 ("south_america",[
@@ -556,4 +574,95 @@ for r in spec_reg_china:
 f.close()
 
 for r in list(set([r for r in reg]) - set([r for rgrp in [rgrp for con in regions for rgrp in con[1]] for r in [rgrp[0]] + rgrp[1] if r in loc] + spec_reg_india + spec_reg_china)):
-    print('Province not output: ' + loc[r])
+    print('Region not output: ' + loc[r])
+
+def getOutgoingNodes(data,node):
+    if 'outgoing' not in data[node]:
+        return []
+    if type(data[node]['outgoing']) is dict:
+        return [data[node]['outgoing']['name'].strip('"')]
+    ll = []
+    for next_node in data[node]['outgoing']:
+        ll.append(next_node['name'].strip('"'))
+    return ll
+
+def makeTradeTree(data,node):
+    return node,[makeTradeTree(data, out_node) for out_node in getOutgoingNodes(data,node)]
+
+def getIncomingNodes(data,node):
+    ll = []
+    for in_node in data:
+        if 'outgoing' in data[in_node]:
+            if type(data[in_node]['outgoing']) is dict:
+                if data[in_node]['outgoing']['name'].strip('"') == node:
+                    ll.append(in_node)
+            else:
+                for out_node in data[in_node]['outgoing']:
+                    if out_node['name'].strip('"') == node:
+                        ll.append(in_node)
+    return ll
+
+def makeReverseTradeTree(data, node):
+    return node,[makeReverseTradeTree(data, in_node) for in_node in getIncomingNodes(data, node)]
+
+def findDepth(tree):
+    if tree[1] == []:
+        return 0
+    return max([findDepth(node) for node in tree[1]]) + 1
+
+ll = []
+for node in tra:
+    ll.append('\n|-\n| ')
+    ll.append(loc[node])
+    ll.append(' {{anchor|')
+    ll.append(node)
+    ll.append('}}\n| ')
+    if 'inland' in tra[node] and tra[node]['inland'] == 'yes':
+        ll.append('Inland')
+    ll.append('\n| ')
+    ll.append(loc[provtab[int(tra[node]['location'])][2]])
+    ll.append('\n| ')
+    ll.append(str(len(tra[node]['members'])))
+    ll.append('\n| ')
+    for in_node in getIncomingNodes(tra,node):
+        ll.append('\n* [[#')
+        ll.append(in_node)
+        ll.append('|')
+        ll.append(loc[in_node])
+        ll.append(']]')
+    ll.append('\n|')
+    for out_node in getOutgoingNodes(tra,node):
+        ll.append('\n* [[#')
+        ll.append(out_node)
+        ll.append('|')
+        ll.append(loc[out_node])
+        ll.append(']]')
+#    ll.append('\n| ')
+#    ll.append(str(findDepth(makeReverseTradeTree(tra,node))))
+#    ll.append('\n| ')
+#    ll.append(str(findDepth(makeTradeTree(tra,node))))
+#    ll.append('\n| ')
+#    ll.append(str(findDepth(makeReverseTradeTree(tra,node)) + 1 + findDepth(makeTradeTree(tra,node))))
+    ll.append('\n|')
+    for p in [int(p) for p in tra[node]['members'] if len(provtab[int(p)][4]) > 0]:
+        ll.append('\n* ')
+        ll.append(provtab[p][0])
+        ll.append(' (')
+        for i in range(len(provtab[p][4])):
+            if provtab[p][4][i] == 'center_of_trade_modifier':
+                ll.append('COT')
+            elif re.search(".*estuary_modifier", provtab[p][4][i]) != None:
+                ll.append('Estuary')
+            elif re.search(".*toll.*", provtab[p][4][i]) != None:
+                ll.append('Toll')
+            else:
+                ll.append(loc[provtab[p][4][i]])
+            if i + 1 < len(provtab[p][4]):
+                ll.append(', ')
+        ll.append(')')
+
+
+
+f = open('trade.wiki','w')
+f.write("".join(ll))
+f.close()
