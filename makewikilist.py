@@ -42,7 +42,8 @@ relcol = {
 'sikhism': "FFFFFF",
 'nahuatl': "3F723F",
 'inti': "3F7272",
-'mesoamerican_religion': "72723F"
+'mesoamerican_religion': "72723F",
+'jewish': "0000C0",
 }
 
 def recdict(ld, i):
