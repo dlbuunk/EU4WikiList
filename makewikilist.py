@@ -34,7 +34,7 @@ relcol = {
 'coptic': "B27F7F",
 'hinduism': "00CCCC",
 'shamanism': "804D4D",
-'confucianism': "CC00E6",
+'confucianism': "D7E38D",
 'sunni': "009900",
 'animism': "800000",
 'protestant': "FFFFFF",
@@ -43,7 +43,11 @@ relcol = {
 'nahuatl': "3F723F",
 'inti': "3F7272",
 'mesoamerican_religion': "72723F",
-'jewish': "0000C0",
+'jewish': "9A1A66",
+'zoroastrian': "80B333",
+'tengri_pagan_reformed': "1A4DDA",
+'mahayana': "CC4D80",
+'vajrayana': "CC4D4D",
 }
 
 def recdict(ld, i):
@@ -103,6 +107,7 @@ for line in [line for line in loc_dat if re.search('\".*\"', line) != None]:
     tmp = re.sub("^\ ", "'", line)
     tmp = re.sub(":", "':", tmp)
     tmp = re.sub(" # .*", '', tmp)
+    tmp = re.sub(" #E.*", '', tmp)
     out.append(re.sub("\"[\ \r]*$", '",\n', tmp))
 out.append('}\n')
 
@@ -220,7 +225,7 @@ for num in provtab:
         except TypeError:
             pass
         try:
-            dat['manpower'] = upd[key]['manpower']
+            dat['base_manpower'] = upd[key]['base_manpower']
         except KeyError:
             pass
         except TypeError:
@@ -243,6 +248,12 @@ for num in provtab:
             pass
         except TypeError:
             pass
+        try:
+            dat['base_production'] = upd[key]['base_production']
+        except KeyError:
+            pass
+        except TypeError:
+            pass
 
     try:
         provtab[num].append(dat['owner'])
@@ -253,7 +264,7 @@ for num in provtab:
     except KeyError:
         provtab[num].append(None)
     try:
-        provtab[num].append(dat['manpower'])
+        provtab[num].append(dat['base_manpower'])
     except KeyError:
         provtab[num].append(None)
     try:
@@ -266,6 +277,10 @@ for num in provtab:
         provtab[num].append(None)
     try:
         provtab[num].append(dat['trade_goods'])
+    except KeyError:
+        provtab[num].append(None)
+    try:
+        provtab[num].append(dat['base_production'])
     except KeyError:
         provtab[num].append(None)
 
@@ -305,6 +320,7 @@ f.write('\n! Continent')
 f.write('\n! Region')
 f.write('\n! Owner (1444)')
 f.write('\n! BT')
+f.write('\n! BP')
 f.write('\n! BM')
 f.write('\n! [[Religion]]')
 f.write('\n! Culture')
@@ -316,17 +332,17 @@ for p in provtab:
     f.write('\n| ' + str(p))
     f.write('\n| ' + provtab[p][0])
     if provtab[p][1] == 'Lake':
-        f.write('\n|bgcolor=#CCDDFF colspan="10"|Lake')
+        f.write('\n|bgcolor=#CCDDFF colspan="11"|Lake')
         continue
     if provtab[p][1] == 'Sea':
         if p in inland_seas:
-            f.write('\n|bgcolor=#CCDDFF colspan="10"|Inland sea')
+            f.write('\n|bgcolor=#CCDDFF colspan="11"|Inland sea')
         else:
-            f.write('\n|bgcolor=#CCDDFF colspan="10"|Sea')
+            f.write('\n|bgcolor=#CCDDFF colspan="11"|Sea')
         continue
     f.write('\n| ' + loc[provtab[p][2]])
     if (provtab[p][1] == 'Wasteland'):
-        f.write('\n|bgcolor=#E5E5E5 colspan="9"|Wasteland')
+        f.write('\n|bgcolor=#E5E5E5 colspan="10"|Wasteland')
         continue
     f.write('\n| ')
     for i in range(len(provtab[p][3])):
@@ -341,6 +357,10 @@ for p in provtab:
         f.write('\n|')
     else:
         f.write('\n| ' + provtab[p][6])
+    if provtab[p][11] == None:
+        f.write('\n|')
+    else:
+        f.write('\n| ' + provtab[p][11])
     if provtab[p][7] == None:
         f.write('\n|')
     else:
@@ -351,7 +371,7 @@ for p in provtab:
         f.write('\n|bgcolor=#' + relcol[provtab[p][8]] + '|' + loc[provtab[p][8]])
     f.write('\n| ' + loc[provtab[p][9]])
     f.write('\n| ' + loc[provtab[p][10]])
-    f.write('\n| ' + loc[provtab[p][11]])
+    f.write('\n| ' + loc[provtab[p][-1]])
     f.write('\n| ')
     for i in range(len(provtab[p][4])):
         f.write(loc[provtab[p][4][i]])
@@ -368,14 +388,14 @@ regions = [
 ('the_low_countries',['spanish_netherlands']),
 ('french_region',['gallia','breton_region','aquitania','occitania']),
 ('',['lotharingia']),
-('german_region',['westphalian_region','franconia','swabia','austrian_region']),
+('german_region',['prussian_region','westphalian_region','franconian_region','franconia','swabia','bavarian_region','austrian_region']),
 ('',['helvetia']),
-('italian_region',['lombardia','two_sicilies']),
+('italian_region',['lombardia','kingdom_of_italy_HRE_region','southern_italy_region','two_sicilies','sicily_region']),
 ('iberian_peninsula',['spanish_region','andalusia']),
 ('The Baltics',['the_baltics','lithuanian_region']),
 ('East-Central Europe',['bohemian_region','hungarian_region','wielkopolska','malopolska']),
 ('Southeast Europe',['western_balkans','eastern_balkans','greece_region','dacia','croatian_region','serbian_region','bulgarian_region']),
-('Eastern Europe',['belarus','ukrainian_region','russian_region','kaffa_and_azow','steppes']),
+('Eastern Europe',['belarus','ukrainian_region','russian_region','crimean_region','steppes']),
 ('',['caucasus']),
 ('Turkey',['anatolia','asia_minor']),
 ]),
@@ -429,11 +449,12 @@ def doregion(name,cont):
             s = s + "{{RTR|" + p + "|" + provtab[n][0] + "|" + \
                 (loc[provtab[n][5]] if provtab[n][5] != None else "Natives") + "|" + \
                 provtab[n][6] + "|" + \
-                (provtab[n][7] if provtab[n][7] != None else "") + "|" + \
+                provtab[n][11] + "|" + \
+                provtab[n][7] + "|" + \
                 (loc[provtab[n][8]] if provtab[n][8] != None else "None") + "|" + \
                 loc[provtab[n][9]] + "|" + \
                 loc[provtab[n][10]] + "|" + \
-                loc[provtab[n][11]] + "|"
+                loc[provtab[n][-1]] + "|"
         if provtab[n][4] != []:
             for i in range(len(provtab[n][4])):
                 s = s + loc[provtab[n][4][i]]
@@ -564,7 +585,7 @@ for r in spec_reg_china:
 f.close()
 
 for r in list(set([r for r in reg]) - set([r for rgrp in [rgrp for con in regions for rgrp in con[1]] for r in [rgrp[0]] + rgrp[1] if r in loc] + spec_reg_india + spec_reg_china)):
-    print('Region not output: ' + loc[r])
+    print('Region not output: ' + r)
 
 def getOutgoingNodes(data,node):
     if 'outgoing' not in data[node]:

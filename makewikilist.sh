@@ -19,3 +19,5 @@ for file in $(ls *.yml); do cat $file >> localisation.txt; echo "" >> localisati
 grep 'PROV[1-9][0-9]*:' *.yml | sed 's/.*yml://g' > prov_names.txt
 
 python3 makewikilist.py
+
+for file in $(ls *.wiki); do sed 's/Naval\ Supplies/Naval\ supplies/' -i $file; done
