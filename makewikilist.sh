@@ -7,7 +7,9 @@ EUPATH=$HOME/.steam/steam/SteamApps/common/Europa\ Universalis\ IV
 cp "$EUPATH"/localisation/*_english.yml .
 cp "$EUPATH"/map/default.map .
 cp "$EUPATH"/map/continent.txt .
+cp "$EUPATH"/map/superregion.txt .
 cp "$EUPATH"/map/region.txt .
+cp "$EUPATH"/map/area.txt .
 cp "$EUPATH"/history/provinces/* .
 cp "$EUPATH"/common/tradenodes/00_tradenodes.txt .
 
