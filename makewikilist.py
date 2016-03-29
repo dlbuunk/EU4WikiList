@@ -217,7 +217,7 @@ for num in provtab:
                 day = '0' + day
             upd[year+month+day] = dat[key]
 
-#    for key in sorted(upd):
+    for key in sorted(upd):
 #        try:
 #            provtab[num][5].append(upd[key]['add_permanent_province_modifier']['name'])
 #        except KeyError:
@@ -315,6 +315,8 @@ for num in provtab:
     except KeyError:
         provtab[num].append(None)
 
+# Some manual fixes for Paradox-'bugs'
+provtab[2683][12] = 'unknown'
 for p in provtab:
     if provtab[p][6] == 'XXX':
         provtab[p][6] = None
@@ -350,20 +352,24 @@ for p in provtab:
         provtab[p].append(None)
 
 f = open('provinces.wiki', 'w')
-f.write('{| class="wikitable sortable" style="font-size:95%; text-align:left"')
+f.write('{{version|1.15}}')
+f.write('\nThis is the complete list of [[provinces]] in the game, as well as information regarding their owner, tax, manpower, religion, culture and trade goods as per the 1444 start. Note that later game starts may have significantly different information for each province. Hold Ctrl+F and type in the intended province instead of having to scroll through. There is also [[:File:Province ID map.png|a map of province IDs]].')
+f.write('\n\n==List of provinces==')
+f.write("\n\n<!-- This list is computer-generated. Please don't edit it manually -->")
+f.write('\n{| class="wikitable sortable" style="font-size:95%; text-align:left"')
 f.write('\n! ID')
 f.write('\n! Name')
-f.write('\n! Area')
-f.write('\n! Region')
-f.write('\n! Superregion')
 f.write('\n! Continent')
+f.write('\n! Superregion')
+f.write('\n! Region')
+f.write('\n! Area')
 f.write('\n! Owner (1444)')
 f.write('\n! BT')
 f.write('\n! BP')
 f.write('\n! BM')
-f.write('\n! Religion')
+f.write('\n! Rel')
 f.write('\n! Culture')
-f.write('\n! Trade goods')
+f.write('\n! TG')
 f.write('\n! Trade node')
 f.write('\n! Permanent modifiers')
 for p in provtab:
@@ -389,7 +395,7 @@ for p in provtab:
     if provtab[p][6] == None:
         f.write('\n|')
     else:
-        f.write('\n| [[' + loc[provtab[p][6]] + ']]')
+        f.write('\n| [[File:' + loc[provtab[p][6]] + '.png|24px|border|alt=' + loc[provtab[p][6]] + '|link=' + loc[provtab[p][6]] + ']] [[' + loc[provtab[p][6]] + ']]')
     if provtab[p][7] == None:
         f.write('\n|')
     else:
@@ -405,9 +411,13 @@ for p in provtab:
     if provtab[p][10] == None:
         f.write('\n|')
     else:
-        f.write('\n|bgcolor=#' + relcol[provtab[p][10]] + '|' + loc[provtab[p][10]])
+#        f.write('\n|bgcolor=#' + relcol[provtab[p][10]] + '| [[File:' + loc[provtab[p][10]] + '.png|24px|alt=' + loc[provtab[p][10]] + '|link=' + loc[provtab[p][10]] + ']]')
+        f.write('\n| [[File:' + loc[provtab[p][10]] + '.png|24px|alt=' + loc[provtab[p][10]] + '|link=' + loc[provtab[p][10]] + ']]')
     f.write('\n| ' + loc[provtab[p][11]])
-    f.write('\n| ' + loc[provtab[p][12]])
+    if loc[provtab[p][12]] == 'Naval Supplies':
+        f.write('\n| [[File:Naval supplies.png|24px|alt=Naval supplies|link=Naval supplies]]')
+    else:
+        f.write('\n| [[File:' + loc[provtab[p][12]] + '.png|24px|alt=' + loc[provtab[p][12]] + '|link=' + loc[provtab[p][12]] + ']]')
     f.write('\n| ' + loc[provtab[p][13]])
     f.write('\n| ')
     for i in range(len(provtab[p][5])):
@@ -415,6 +425,9 @@ for p in provtab:
         if i + 1 < len(provtab[p][5]):
             f.write(' / ')
 f.write('\n|}')
+f.write('\n\n[[Category:Province mechanics]]')
+f.write('\n[[Category:Modding]]')
+f.write('\n')
 f.close()
 
 def doregion(name,cont):
