@@ -12,11 +12,13 @@ cp "$EUPATH"/map/region.txt .
 cp "$EUPATH"/map/area.txt .
 cp "$EUPATH"/history/provinces/* .
 cp "$EUPATH"/common/tradenodes/00_tradenodes.txt .
+cp "$EUPATH"/common/cultures/00_cultures.txt .
 
 rename "s/[-\s].*//g" [1-9]*
 
 echo "" > localisation.txt
 for file in $(ls *.yml); do cat $file >> localisation.txt; echo "" >> localisation.txt; done
+echo " madagascan: \"Madagascan\"" >> localisation.txt
 
 grep 'PROV[1-9][0-9]*:' *.yml | sed 's/.*yml://g' > prov_names.txt
 

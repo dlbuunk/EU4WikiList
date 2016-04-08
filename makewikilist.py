@@ -143,7 +143,7 @@ reg = decode(f.read())[0]
 f.close()
 
 for r in reg:
-    if 'areas' not in reg[r]:
+    if reg[r] == None:
         continue
     for a in reg[r]['areas']:
         for p in provtab:
@@ -318,6 +318,8 @@ for num in provtab:
 # Some manual fixes for Paradox-'bugs'
 provtab[2683][12] = 'unknown'
 for p in provtab:
+    if provtab[p][1] == 'ngonde_area':
+        provtab[p].remove('central_africa_region')
     if provtab[p][6] == 'XXX':
         provtab[p][6] = None
     if provtab[p][10] != None:
@@ -351,51 +353,108 @@ for p in provtab:
     if len(provtab[p]) < 15:
         provtab[p].append(None)
 
-f = open('provinces.wiki', 'w')
-f.write('{{version|1.15}}')
-f.write('\nThis is the complete list of [[provinces]] in the game, as well as information regarding their owner, tax, manpower, religion, culture and trade goods as per the 1444 start. Note that later game starts may have significantly different information for each province. Hold Ctrl+F and type in the intended province instead of having to scroll through. There is also [[:File:Province ID map.png|a map of province IDs]].')
-f.write('\n\n==List of provinces==')
+f = open('00_cultures.txt', encoding="latin-1")
+cul =  decode(f.read())[0]
+f.close()
+
+for p in provtab:
+    for cg in cul:
+        if provtab[p][11] in cul[cg]:
+            provtab[p].append(cg)
+for p in provtab:
+    if len(provtab[p]) < 16:
+        provtab[p].append(None)
+
+f = open('provinces_geo.wiki', 'w')
+f.write('{{version|1.16}}')
+#f.write('\nThis is a complete list of [[provinces]] in the game, as well as information regarding their owner, tax, manpower, religion, culture and trade goods as per the 1444 start. Note that later game starts may have significantly different information for each province. Hold Ctrl+F and type in the intended province instead of having to scroll through. There is also [[:File:Province ID map.png|a map of province IDs]].')
+#f.write('\n\n==List of provinces==')
 f.write("\n\n<!-- This list is computer-generated. Please don't edit it manually -->")
 f.write('\n{| class="wikitable sortable" style="font-size:95%; text-align:left"')
 f.write('\n! ID')
 f.write('\n! Name')
+f.write('\n! Type')
 f.write('\n! Continent')
 f.write('\n! Superregion')
 f.write('\n! Region')
 f.write('\n! Area')
+for p in provtab:
+    f.write('\n|-')
+    f.write('\n| ' + str(p))
+    f.write('\n| ' + provtab[p][0])
+    if provtab[p][14] == 'Lake':
+        f.write('\n|bgcolor=#CCDDFF|Lake')
+    elif provtab[p][14] == 'Sea':
+        if p in inland_seas:
+            f.write('\n|bgcolor=#CCDDFF|Inland sea')
+        else:
+            f.write('\n|bgcolor=#CCDDFF|Sea')
+    elif provtab[p][7] == None:
+        f.write('\n|bgcolor=#E5E5E5|Wasteland')
+    else:
+        f.write('\n|bgcolor=#AAFFAA|Land')
+    f.write('\n| ' + loc[provtab[p][4]])
+    f.write('\n| ' + loc[provtab[p][3]])
+    f.write('\n| ' + loc[provtab[p][2]])
+    f.write('\n| ' + loc[provtab[p][1]])
+f.write('\n|}')
+f.write('\n\n[[Category:Province mechanics]]')
+f.write('\n[[Category:Modding]]')
+f.write('\n')
+f.close()
+
+f = open('provinces_pol.wiki', 'w')
+f.write('{{version|1.16}}')
+f.write("\n\n<!-- This list is computer-generated. Please don't edit it manually -->")
+f.write('\n{| class="wikitable sortable" style="font-size:95%; text-align:left"')
+f.write('\n! ID')
+f.write('\n! Name')
 f.write('\n! Owner (1444)')
+f.write('\n! Religion')
+f.write('\n! Culture')
+f.write('\n! Culture Group')
+for p in provtab:
+    f.write('\n|-')
+    f.write('\n| ' + str(p))
+    f.write('\n| ' + provtab[p][0])
+    if provtab[p][6] == None:
+        f.write('\n|')
+    else:
+        f.write('\n| [[File:' + loc[provtab[p][6]] + '.png|24px|border|alt=' + loc[provtab[p][6]] + '|link=' + loc[provtab[p][6]] + ']] [[' + loc[provtab[p][6]] + ']]')
+    if provtab[p][10] == None:
+        f.write('\n|')
+    else:
+#        f.write('\n|bgcolor=#' + relcol[provtab[p][10]] + '| [[File:' + loc[provtab[p][10]] + '.png|24px|alt=' + loc[provtab[p][10]] + '|link=' + loc[provtab[p][10]] + ']]')
+        f.write('\n| [[File:' + loc[provtab[p][10]] + '.png|24px|alt=' + loc[provtab[p][10]] + '|link=' + loc[provtab[p][10]] + ']]')
+    f.write('\n| ' + loc[provtab[p][11]])
+    f.write('\n| ' + loc[provtab[p][15]])
+f.write('\n|}')
+f.write('\n\n[[Category:Province mechanics]]')
+f.write('\n[[Category:Modding]]')
+f.write('\n')
+f.close()
+
+f = open('provinces_eco.wiki', 'w')
+f.write('{{version|1.16}}')
+f.write("\n\n<!-- This list is computer-generated. Please don't edit it manually -->")
+f.write('\n{| class="wikitable sortable" style="font-size:95%; text-align:left"')
+f.write('\n! ID')
+f.write('\n! Name')
+f.write('\n! Development')
 f.write('\n! BT')
 f.write('\n! BP')
 f.write('\n! BM')
-f.write('\n! Rel')
-f.write('\n! Culture')
-f.write('\n! TG')
+f.write('\n! Trade good')
 f.write('\n! Trade node')
 f.write('\n! Permanent modifiers')
 for p in provtab:
     f.write('\n|-')
     f.write('\n| ' + str(p))
     f.write('\n| ' + provtab[p][0])
-    if provtab[p][14] == 'Lake':
-        f.write('\n|bgcolor=#CCDDFF colspan="13"|Lake')
-        continue
-    if provtab[p][14] == 'Sea':
-        if p in inland_seas:
-            f.write('\n|bgcolor=#CCDDFF colspan="13"|Inland sea')
-        else:
-            f.write('\n|bgcolor=#CCDDFF colspan="13"|Sea')
-        continue
-    f.write('\n| ' + loc[provtab[p][4]])
     if provtab[p][7] == None:
-        f.write('\n|bgcolor=#E5E5E5 colspan="12"|Wasteland')
-        continue
-    f.write('\n| ' + loc[provtab[p][3]])
-    f.write('\n| ' + loc[provtab[p][2]])
-    f.write('\n| ' + loc[provtab[p][1]])
-    if provtab[p][6] == None:
         f.write('\n|')
     else:
-        f.write('\n| [[File:' + loc[provtab[p][6]] + '.png|24px|border|alt=' + loc[provtab[p][6]] + '|link=' + loc[provtab[p][6]] + ']] [[' + loc[provtab[p][6]] + ']]')
+        f.write('\n| ' + str(int(provtab[p][7]) + int(provtab[p][8]) + int(provtab[p][9])))
     if provtab[p][7] == None:
         f.write('\n|')
     else:
@@ -408,13 +467,9 @@ for p in provtab:
         f.write('\n|')
     else:
         f.write('\n| ' + provtab[p][9])
-    if provtab[p][10] == None:
+    if provtab[p][12] == None:
         f.write('\n|')
-    else:
-#        f.write('\n|bgcolor=#' + relcol[provtab[p][10]] + '| [[File:' + loc[provtab[p][10]] + '.png|24px|alt=' + loc[provtab[p][10]] + '|link=' + loc[provtab[p][10]] + ']]')
-        f.write('\n| [[File:' + loc[provtab[p][10]] + '.png|24px|alt=' + loc[provtab[p][10]] + '|link=' + loc[provtab[p][10]] + ']]')
-    f.write('\n| ' + loc[provtab[p][11]])
-    if loc[provtab[p][12]] == 'Naval Supplies':
+    elif loc[provtab[p][12]] == 'Naval Supplies':
         f.write('\n| [[File:Naval supplies.png|24px|alt=Naval supplies|link=Naval supplies]]')
     else:
         f.write('\n| [[File:' + loc[provtab[p][12]] + '.png|24px|alt=' + loc[provtab[p][12]] + '|link=' + loc[provtab[p][12]] + ']]')
