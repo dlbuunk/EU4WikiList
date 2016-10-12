@@ -2,7 +2,7 @@
 
 rm -f [1-9]* *.txt *.yml
 
-EUPATH=$HOME/.steam/steam/SteamApps/common/Europa\ Universalis\ IV
+EUPATH=$HOME/.local/share/Steam/steamapps/common/Europa\ Universalis\ IV
 
 cp "$EUPATH"/localisation/*_english.yml .
 cp "$EUPATH"/map/default.map .
@@ -18,9 +18,22 @@ rename "s/[-\s].*//g" [1-9]*
 
 echo "" > localisation.txt
 for file in $(ls *.yml); do cat $file >> localisation.txt; echo "" >> localisation.txt; done
+sed -i -e "s/:[0-9]/:/g" -e "s/§Y\"//g" -e "s/\"§//g" \
+  -e "s/\"Beeldenstorm\"//g" \
+  -e "s/\"only a girl,\"//g" \
+  -e "s/\"Try and try again,\"//g" \
+  -e "s/\"foreign languages.\"//g" \
+  -e "s/\"divine visions.\"//g" \
+  -e "s/\"degregado.\"//g" \
+  -e "s/\"the Land of Flames.\"//g" \
+  -e "s/\"challenges\"//g" \
+  -e "s/\"problems\"//g" \
+  -e "s/\"Grosse Kirchenordnung\"//g" \
+  -e "s/\"\"When \[Root.Consort.GetName\]//g" \
+  localisation.txt
 echo " madagascan: \"Madagascan\"" >> localisation.txt
 
-grep 'PROV[1-9][0-9]*:' *.yml | sed 's/.*yml://g' > prov_names.txt
+grep 'PROV[1-9][0-9]*:' *.yml | sed 's/.*yml://g' | sed 's/:0/:/g' > prov_names.txt
 
 python3 makewikilist.py
 

@@ -318,8 +318,8 @@ for num in provtab:
 # Some manual fixes for Paradox-'bugs'
 provtab[2683][12] = 'unknown'
 for p in provtab:
-    if provtab[p][1] == 'ngonde_area':
-        provtab[p].remove('central_africa_region')
+#    if provtab[p][1] == 'ngonde_area':
+#        provtab[p].remove('central_africa_region')
     if provtab[p][6] == 'XXX':
         provtab[p][6] = None
     if provtab[p][10] != None:
@@ -366,7 +366,7 @@ for p in provtab:
         provtab[p].append(None)
 
 f = open('provinces_geo.wiki', 'w')
-f.write('{{version|1.16}}')
+f.write('{{version|1.18}}')
 #f.write('\nThis is a complete list of [[provinces]] in the game, as well as information regarding their owner, tax, manpower, religion, culture and trade goods as per the 1444 start. Note that later game starts may have significantly different information for each province. Hold Ctrl+F and type in the intended province instead of having to scroll through. There is also [[:File:Province ID map.png|a map of province IDs]].')
 #f.write('\n\n==List of provinces==')
 f.write("\n\n<!-- This list is computer-generated. Please don't edit it manually -->")
@@ -404,7 +404,7 @@ f.write('\n')
 f.close()
 
 f = open('provinces_pol.wiki', 'w')
-f.write('{{version|1.16}}')
+f.write('{{version|1.18}}')
 f.write("\n\n<!-- This list is computer-generated. Please don't edit it manually -->")
 f.write('\n{| class="wikitable sortable" style="font-size:95%; text-align:left"')
 f.write('\n! ID')
@@ -435,7 +435,7 @@ f.write('\n')
 f.close()
 
 f = open('provinces_eco.wiki', 'w')
-f.write('{{version|1.16}}')
+f.write('{{version|1.18}}')
 f.write("\n\n<!-- This list is computer-generated. Please don't edit it manually -->")
 f.write('\n{| class="wikitable sortable" style="font-size:95%; text-align:left"')
 f.write('\n! ID')
